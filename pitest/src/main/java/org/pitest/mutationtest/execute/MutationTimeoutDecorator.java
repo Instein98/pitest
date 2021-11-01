@@ -24,6 +24,8 @@ import org.pitest.functional.SideEffect;
 import org.pitest.mutationtest.TimeoutLengthStrategy;
 import org.pitest.testapi.ResultCollector;
 import org.pitest.testapi.TestUnit;
+import org.pitest.testapi.execute.CurrentTestResultCollector;
+import org.pitest.util.ExitCode;
 import org.pitest.util.Unchecked;
 
 public final class MutationTimeoutDecorator extends TestUnitDecorator {
@@ -50,7 +52,16 @@ public final class MutationTimeoutDecorator extends TestUnitDecorator {
     final FutureTask<?> future = createFutureForChildTestUnit(rc);
     executeFutureWithTimeOut(maxTime, future, rc);
     if (!future.isDone()) {
-      this.timeOutSideEffect.apply();
+      if (timeOutSideEffect instanceof TimeOutSystemExitSideEffect){
+        Reporter r = ((TimeOutSystemExitSideEffect) timeOutSideEffect).getR();
+        if (r instanceof CurrentTestReporter){
+          ((CurrentTestReporter) r).done(ExitCode.TIMEOUT, ((CurrentTestResultCollector)rc).getCurDescription());
+        } else {
+          r.done(ExitCode.TIMEOUT);
+        }
+      } else {
+        this.timeOutSideEffect.apply();
+      }
     }
 
   }

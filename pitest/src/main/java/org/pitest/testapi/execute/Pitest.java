@@ -54,6 +54,7 @@ public class Pitest {
   private void executeTests(final Container container,
       final List<? extends TestUnit> testUnits) {
     for (final TestUnit unit : testUnits) {
+      LOG.info("******** Running TestUnit: " + unit.getDescription() + " ********");
       final List<TestResult> results = container.execute(unit);
       processResults(results);
     }

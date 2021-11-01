@@ -22,14 +22,9 @@ import org.pitest.functional.SideEffect1;
 import org.pitest.mutationtest.DetectionStatus;
 import org.pitest.mutationtest.MutationStatusTestPair;
 import org.pitest.mutationtest.engine.MutationIdentifier;
-import org.pitest.util.CommunicationThread;
-import org.pitest.util.Id;
-import org.pitest.util.Log;
-import org.pitest.util.ReceiveStrategy;
-import org.pitest.util.SafeDataInputStream;
-import org.pitest.util.SafeDataOutputStream;
+import org.pitest.util.*;
 
-public class MutationTestCommunicationThread extends CommunicationThread {
+public class MutationTestCommunicationThread extends WrappingCommnicationThread {
 
   private static final Logger LOG = Log.getLogger();
 

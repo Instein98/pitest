@@ -10,7 +10,9 @@ import org.pitest.mutationtest.engine.MutationDetails;
 import org.pitest.mutationtest.engine.MutationIdentifier;
 import org.pitest.process.ProcessArgs;
 import org.pitest.process.WrappingProcess;
+import org.pitest.testapi.TestUnit;
 import org.pitest.util.ExitCode;
+import org.pitest.util.WrappingExitCode;
 
 public class MutationTestProcess {
 
@@ -42,7 +44,7 @@ public class MutationTestProcess {
 
   }
 
-  public ExitCode waitToDie() {
+  public WrappingExitCode waitToDie() {
     try {
       return this.thread.waitToFinish();
     } finally {
@@ -51,4 +53,7 @@ public class MutationTestProcess {
 
   }
 
+//  public TestUnit getTimeoutTestUnit(){
+//
+//  }
 }

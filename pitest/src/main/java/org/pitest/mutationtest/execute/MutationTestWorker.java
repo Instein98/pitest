@@ -35,10 +35,7 @@ import org.pitest.mutationtest.engine.MutationIdentifier;
 import org.pitest.mutationtest.mocksupport.JavassistInterceptor;
 import org.pitest.testapi.TestResult;
 import org.pitest.testapi.TestUnit;
-import org.pitest.testapi.execute.Container;
-import org.pitest.testapi.execute.ExitingResultCollector;
-import org.pitest.testapi.execute.MultipleTestGroup;
-import org.pitest.testapi.execute.Pitest;
+import org.pitest.testapi.execute.*;
 import org.pitest.testapi.execute.containers.ConcreteResultCollector;
 import org.pitest.testapi.execute.containers.UnContainer;
 import org.pitest.util.Log;
@@ -48,9 +45,13 @@ public class MutationTestWorker {
   private static final Logger                               LOG   = Log
       .getLogger();
 
+  static {
+    LOG.setLevel(Level.FINE);
+  }
   // micro optimise debug logging
-  private static final boolean                              DEBUG = LOG
-      .isLoggable(Level.FINE);
+//  private static final boolean                              DEBUG = LOG
+//      .isLoggable(Level.FINE);
+  private static final boolean                              DEBUG = true;
 
   private final Mutater                                     mutater;
   private final ClassLoader                                 loader;
@@ -73,10 +74,8 @@ public class MutationTestWorker {
       }
       final long t0 = System.currentTimeMillis();
       processMutation(r, testSource, mutation);
-      if (DEBUG) {
-        LOG.fine("processed mutation in " + (System.currentTimeMillis() - t0)
+      LOG.info("processed mutation in " + (System.currentTimeMillis() - t0)
             + " ms.");
-      }
     }
 
   }
@@ -93,9 +92,9 @@ public class MutationTestWorker {
     // bytes are returned
     JavassistInterceptor.setMutant(mutatedClass);
 
-    if (DEBUG) {
-      LOG.fine("mutating method " + mutatedClass.getDetails().getMethod());
-    }
+//    if (DEBUG) {
+    LOG.info("mutating method " + mutatedClass.getDetails().getMethod());
+//    }
     final List<TestUnit> relevantTests = testSource
         .translateTests(mutationDetails.getTestsInOrder());
 
@@ -105,9 +104,9 @@ public class MutationTestWorker {
         mutationDetails, mutatedClass, relevantTests);
 
     r.report(mutationId, mutationDetected);
-    if (DEBUG) {
-      LOG.fine("Mutation " + mutationId + " detected = " + mutationDetected);
-    }
+//    if (DEBUG) {
+    LOG.info("Mutation " + mutationId + " detected = " + mutationDetected);
+//    }
   }
 
   private MutationStatusTestPair handleMutation(
@@ -158,7 +157,7 @@ public class MutationTestWorker {
       @Override
       public List<TestResult> execute(final TestUnit group) {
         List<TestResult> results = new ArrayList<>();
-        final ExitingResultCollector rc = new ExitingResultCollector(
+        final CurrentTestResultCollector rc = new CurrentTestResultCollector(
             new ConcreteResultCollector(results));
         group.execute(rc);
         return results;

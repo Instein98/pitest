@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.pitest.functional.SideEffect1;
+import org.pitest.testapi.Description;
 
 public class CommunicationThread {
 

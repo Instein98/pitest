@@ -7,6 +7,10 @@ public class TimeOutSystemExitSideEffect implements SideEffect {
 
   private final Reporter r;
 
+  public Reporter getR() {
+    return r;
+  }
+
   public TimeOutSystemExitSideEffect(final Reporter r) {
     this.r = r;
   }

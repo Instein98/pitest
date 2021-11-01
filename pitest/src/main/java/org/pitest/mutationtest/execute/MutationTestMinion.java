@@ -55,6 +55,10 @@ public class MutationTestMinion {
 
   private static final Logger       LOG = Log.getLogger();
 
+  static{
+    LOG.setLevel(Level.FINE);
+  }
+
   // We maintain a small cache to avoid reading byte code off disk more than once
   // Size is arbitrary but assumed to be large enough to cover likely max number of inner classes
   private static final int CACHE_SIZE = 12;
@@ -98,12 +102,20 @@ public class MutationTestMinion {
       worker.run(paramsFromParent.mutations, this.reporter,
           new TimeOutDecoratedTestSource(paramsFromParent.timeoutStrategy,
               tests, this.reporter));
-      
-      this.reporter.done(ExitCode.OK);
+
+      if (reporter instanceof CurrentTestReporter){
+        ((CurrentTestReporter) reporter).done(ExitCode.OK, null);
+      } else {
+        this.reporter.done(ExitCode.OK);
+      }
     } catch (final Throwable ex) {
       ex.printStackTrace(System.out);
       LOG.log(Level.WARNING, "Error during mutation test", ex);
-      this.reporter.done(ExitCode.UNKNOWN_ERROR);
+      if (reporter instanceof CurrentTestReporter){
+        ((CurrentTestReporter) reporter).done(ExitCode.UNKNOWN_ERROR, null);
+      } else {
+        this.reporter.done(ExitCode.UNKNOWN_ERROR);
+      }
     }
 
   }
@@ -130,7 +142,7 @@ public class MutationTestMinion {
       final SafeDataInputStream dis = new SafeDataInputStream(
           s.getInputStream());
 
-      final Reporter reporter = new DefaultReporter(s.getOutputStream());
+      final Reporter reporter = new CurrentTestReporter(s.getOutputStream());
       addMemoryWatchDog(reporter);
       ClientPluginServices plugins = new ClientPluginServices(IsolationUtils.getContextClassLoader());
       MinionSettings factory = new MinionSettings(plugins);
@@ -187,7 +199,11 @@ public class MutationTestMinion {
               + " has exceeded the shutdown threshold : " + memInfo.getCount()
               + " times.\n" + memInfo.getUsage());
 
-          r.done(ExitCode.OUT_OF_MEMORY);
+          if (r instanceof CurrentTestReporter){
+            ((CurrentTestReporter) r).done(ExitCode.OUT_OF_MEMORY, null);
+          } else {
+            r.done(ExitCode.OUT_OF_MEMORY);
+          }
 
         } else {
           LOG.warning("Unknown notification: " + notification);

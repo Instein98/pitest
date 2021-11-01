@@ -24,8 +24,10 @@ import org.pitest.mutationtest.MutationMetaData;
 import org.pitest.mutationtest.MutationStatusMap;
 import org.pitest.mutationtest.engine.MutationDetails;
 import org.pitest.mutationtest.execute.MutationTestProcess;
+import org.pitest.testapi.Description;
 import org.pitest.util.ExitCode;
 import org.pitest.util.Log;
+import org.pitest.util.WrappingExitCode;
 
 public class MutationTestUnit implements MutationAnalysisUnit {
 
@@ -89,8 +91,13 @@ public class MutationTestUnit implements MutationAnalysisUnit {
   }
 
   private static ExitCode waitForMinionToDie(final MutationTestProcess worker) {
-    final ExitCode exitCode = worker.waitToDie();
-    LOG.fine("Exit code was - " + exitCode);
+    final WrappingExitCode wrappingExitCode = worker.waitToDie();
+    final ExitCode exitCode = wrappingExitCode.getExitCode();
+    Description curDescription = wrappingExitCode.getCurrentTestDescription();
+    LOG.info("Exit code was - " + exitCode);
+    if (exitCode == ExitCode.TIMEOUT){
+      LOG.info("TimeoutTest: " + curDescription);
+    }
     return exitCode;
   }
 
@@ -110,7 +117,7 @@ public class MutationTestUnit implements MutationAnalysisUnit {
       final DetectionStatus status = DetectionStatus
           .getForErrorExitCode(exitCode);
       LOG.warning("Minion exited abnormally due to " + status);
-      LOG.fine("Setting " + unfinishedRuns.size() + " unfinished runs to "
+      LOG.warning("Setting " + unfinishedRuns.size() + " unfinished runs to "
           + status + " state");
       mutations.setStatusForMutations(unfinishedRuns, status);
 
