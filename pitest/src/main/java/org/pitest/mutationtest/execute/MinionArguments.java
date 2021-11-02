@@ -16,12 +16,14 @@ package org.pitest.mutationtest.execute;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Set;
 
 import org.pitest.classinfo.ClassName;
 import org.pitest.mutationtest.EngineArguments;
 import org.pitest.mutationtest.TimeoutLengthStrategy;
 import org.pitest.mutationtest.config.TestPluginArguments;
 import org.pitest.mutationtest.engine.MutationDetails;
+import org.pitest.testapi.Description;
 
 public class MinionArguments implements Serializable {
   
@@ -35,6 +37,8 @@ public class MinionArguments implements Serializable {
   final boolean                     verbose;
   final TestPluginArguments         pitConfig;
 
+  final Set<Description>            timeoutTests;
+
   public MinionArguments(final Collection<MutationDetails> mutations,
       final Collection<ClassName> tests, final String engine,   final EngineArguments engineArgs,
       final TimeoutLengthStrategy timeoutStrategy, final boolean verbose,
@@ -46,6 +50,20 @@ public class MinionArguments implements Serializable {
     this.timeoutStrategy = timeoutStrategy;
     this.verbose = verbose;
     this.pitConfig = pitConfig;
+    this.timeoutTests = null;
+  }
+  public MinionArguments(final Collection<MutationDetails> mutations,
+      final Collection<ClassName> tests, final String engine,   final EngineArguments engineArgs,
+      final TimeoutLengthStrategy timeoutStrategy, final boolean verbose,
+      final TestPluginArguments pitConfig, final Set<Description> timeoutTests) {
+    this.mutations = mutations;
+    this.testClasses = tests;
+    this.engine = engine;
+    this.engineArgs = engineArgs;
+    this.timeoutStrategy = timeoutStrategy;
+    this.verbose = verbose;
+    this.pitConfig = pitConfig;
+    this.timeoutTests = timeoutTests;
   }
 
   public boolean isVerbose() {

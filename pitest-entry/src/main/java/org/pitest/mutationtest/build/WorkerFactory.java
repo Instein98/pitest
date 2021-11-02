@@ -50,7 +50,7 @@ public class WorkerFactory {
       final Collection<ClassName> testClasses) {
     final MinionArguments fileArgs = new MinionArguments(remainingMutations,
         testClasses, config.getEngine().getName(), args, this.timeoutStrategy,
-        Log.isVerbose(), this.pitConfig);
+        Log.isVerbose(), this.pitConfig, MutationTestUnit.timeoutTestDescriptions);
 
     final ProcessArgs args = ProcessArgs.withClassPath(this.classPath)
         .andLaunchOptions(this.config.getLaunchOptions())

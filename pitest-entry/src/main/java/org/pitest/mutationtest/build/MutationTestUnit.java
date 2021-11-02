@@ -16,6 +16,8 @@ package org.pitest.mutationtest.build;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.pitest.classinfo.ClassName;
@@ -30,6 +32,8 @@ import org.pitest.util.Log;
 import org.pitest.util.WrappingExitCode;
 
 public class MutationTestUnit implements MutationAnalysisUnit {
+
+  public static Set<Description> timeoutTestDescriptions = new HashSet<>();
 
   private static final Logger               LOG = Log.getLogger();
 
@@ -97,6 +101,7 @@ public class MutationTestUnit implements MutationAnalysisUnit {
     LOG.info("Exit code was - " + exitCode);
     if (exitCode == ExitCode.TIMEOUT){
       LOG.info("TimeoutTest: " + curDescription);
+      timeoutTestDescriptions.add(curDescription);
     }
     return exitCode;
   }

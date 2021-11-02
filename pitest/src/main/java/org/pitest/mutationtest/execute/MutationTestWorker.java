@@ -17,12 +17,10 @@ package org.pitest.mutationtest.execute;
 import static org.pitest.util.Unchecked.translateCheckedException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.pitest.classinfo.ClassName;
 import org.pitest.functional.F3;
@@ -33,6 +31,7 @@ import org.pitest.mutationtest.engine.Mutater;
 import org.pitest.mutationtest.engine.MutationDetails;
 import org.pitest.mutationtest.engine.MutationIdentifier;
 import org.pitest.mutationtest.mocksupport.JavassistInterceptor;
+import org.pitest.testapi.Description;
 import org.pitest.testapi.TestResult;
 import org.pitest.testapi.TestUnit;
 import org.pitest.testapi.execute.*;
@@ -95,8 +94,29 @@ public class MutationTestWorker {
 //    if (DEBUG) {
     LOG.info("mutating method " + mutatedClass.getDetails().getMethod());
 //    }
+
+    // ordered test list
     final List<TestUnit> relevantTests = testSource
         .translateTests(mutationDetails.getTestsInOrder());
+
+    LOG.info("timeoutTestsDescriptions:\n" + Arrays.toString(MutationTestMinion.timeoutTestsDescriptions.toArray()));
+
+    // reorder tests
+    for (Description description: MutationTestMinion.timeoutTestsDescriptions){
+      int idx = -1;
+      for (int i = 0; i < relevantTests.size(); i++){
+        if (relevantTests.get(i).getDescription().equals(description)){
+          idx = i;
+          break;
+        }
+      }
+//      int idx = relevantTests.stream().map(TestUnit::getDescription).collect(Collectors.toList()).indexOf(description);
+      if (idx != -1){
+        LOG.info("Reordering the timeout test to the end: " + description.getQualifiedName());
+        TestUnit unit = relevantTests.remove(idx);
+        relevantTests.add(unit);
+      }
+    }
 
     r.describe(mutationId);
 

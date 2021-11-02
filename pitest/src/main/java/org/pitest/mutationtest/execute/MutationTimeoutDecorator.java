@@ -22,10 +22,12 @@ import java.util.concurrent.TimeoutException;
 import org.pitest.extension.common.TestUnitDecorator;
 import org.pitest.functional.SideEffect;
 import org.pitest.mutationtest.TimeoutLengthStrategy;
+import org.pitest.testapi.Description;
 import org.pitest.testapi.ResultCollector;
 import org.pitest.testapi.TestUnit;
 import org.pitest.testapi.execute.CurrentTestResultCollector;
 import org.pitest.util.ExitCode;
+import org.pitest.util.Log;
 import org.pitest.util.Unchecked;
 
 public final class MutationTimeoutDecorator extends TestUnitDecorator {
@@ -55,7 +57,9 @@ public final class MutationTimeoutDecorator extends TestUnitDecorator {
       if (timeOutSideEffect instanceof TimeOutSystemExitSideEffect){
         Reporter r = ((TimeOutSystemExitSideEffect) timeOutSideEffect).getR();
         if (r instanceof CurrentTestReporter){
-          ((CurrentTestReporter) r).done(ExitCode.TIMEOUT, ((CurrentTestResultCollector)rc).getCurDescription());
+          Description timeoutDescription = ((CurrentTestResultCollector)rc).getCurDescription();
+          Log.getLogger().info("TIMEOUT when running test: " + timeoutDescription.getQualifiedName());
+          ((CurrentTestReporter) r).done(ExitCode.TIMEOUT, timeoutDescription);
         } else {
           r.done(ExitCode.TIMEOUT);
         }

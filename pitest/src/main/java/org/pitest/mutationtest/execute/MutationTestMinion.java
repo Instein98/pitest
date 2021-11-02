@@ -19,6 +19,7 @@ import java.lang.management.MemoryNotificationInfo;
 import java.net.Socket;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,6 +44,7 @@ import org.pitest.mutationtest.mocksupport.BendJavassistToMyWillTransformer;
 import org.pitest.mutationtest.mocksupport.JavassistInputStreamInterceptorAdapater;
 import org.pitest.mutationtest.mocksupport.JavassistInterceptor;
 import org.pitest.testapi.Configuration;
+import org.pitest.testapi.Description;
 import org.pitest.testapi.TestUnit;
 import org.pitest.testapi.execute.FindTestUnits;
 import org.pitest.util.ExitCode;
@@ -54,6 +56,8 @@ import org.pitest.util.SafeDataInputStream;
 public class MutationTestMinion {
 
   private static final Logger       LOG = Log.getLogger();
+
+  public static Set<Description>    timeoutTestsDescriptions;
 
   static{
     LOG.setLevel(Level.FINE);
@@ -81,7 +85,9 @@ public class MutationTestMinion {
           .read(MinionArguments.class);
 
       Log.setVerbose(paramsFromParent.isVerbose());
-      
+
+      timeoutTestsDescriptions = paramsFromParent.timeoutTests;
+
       final ClassLoader loader = IsolationUtils.getContextClassLoader();
 
       final ClassByteArraySource byteSource = new CachingByteArraySource(new ClassloaderByteArraySource(
@@ -130,7 +136,7 @@ public class MutationTestMinion {
 
   public static void main(final String[] args) {
 
-    LOG.log(Level.FINE, "minion started");
+    LOG.log(Level.INFO, "minion started");
 
     enablePowerMockSupport();
 

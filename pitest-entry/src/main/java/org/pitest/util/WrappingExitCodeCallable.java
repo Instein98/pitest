@@ -68,7 +68,7 @@ public class WrappingExitCodeCallable implements Callable<WrappingExitCode> {
 
     private Description getDescription(String str){
         String result[] = str.split("#");
-        return new Description(result[0], result[1]);
+        return new Description(result[1], result[0]);
     }
 
 }
