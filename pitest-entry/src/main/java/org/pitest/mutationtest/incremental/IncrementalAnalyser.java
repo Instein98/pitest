@@ -1,10 +1,6 @@
 package org.pitest.mutationtest.incremental;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
@@ -91,7 +87,7 @@ public class IncrementalAnalyser implements MutationAnalyser {
     if ((mutationStatusTestPair.getStatus() == DetectionStatus.KILLED)
         && killingTestHasNotChanged(each, mutationStatusTestPair)) {
       return makeResult(each, DetectionStatus.KILLED, mutationStatusTestPair
-          .getKillingTest().value());
+          .getKillingTests(), mutationStatusTestPair.getSucceedingTests());
     }
 
     if ((mutationStatusTestPair.getStatus() == DetectionStatus.SURVIVED)
@@ -109,7 +105,7 @@ public class IncrementalAnalyser implements MutationAnalyser {
         .getClassName());
 
     final List<ClassName> testClasses = FCollection.filter(allTests,
-        testIsCalled(mutationStatusTestPair.getKillingTest().value())).map(
+        testIsCalled(mutationStatusTestPair.getKillingTest().get())).map(
             TestInfo.toDefiningClassName());
 
     if (testClasses.isEmpty()) {
@@ -136,14 +132,15 @@ public class IncrementalAnalyser implements MutationAnalyser {
 
   private MutationResult makeResult(final MutationDetails each,
       final DetectionStatus status) {
-    return makeResult(each, status, null);
+    return makeResult(each, status, Collections.emptyList(), Collections.emptyList());
   }
 
   private MutationResult makeResult(final MutationDetails each,
-      final DetectionStatus status, final String killingTest) {
+                                    final DetectionStatus status, final List<String> killingTests,
+                                    final List<String> succeedingTests) {
     updatePreanalysedTotal(status);
     return new MutationResult(each, new MutationStatusTestPair(0, status,
-        killingTest));
+            killingTests, succeedingTests));
   }
 
   private void updatePreanalysedTotal(final DetectionStatus status) {

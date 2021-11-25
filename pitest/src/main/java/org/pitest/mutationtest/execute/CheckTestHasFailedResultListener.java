@@ -14,20 +14,28 @@
  */
 package org.pitest.mutationtest.execute;
 
-import org.pitest.functional.Option;
 import org.pitest.mutationtest.DetectionStatus;
 import org.pitest.testapi.Description;
 import org.pitest.testapi.TestListener;
 import org.pitest.testapi.TestResult;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CheckTestHasFailedResultListener implements TestListener {
 
-  private Option<Description> lastFailingTest = Option.none();
+  private final List<Description> succeedingTests = new ArrayList<>();
+  private final List<Description>   failingTests = new ArrayList<>();
+  private final boolean       recordPassingTests;
   private int                 testsRun        = 0;
+
+  public CheckTestHasFailedResultListener(boolean recordPassingTests) {
+    this.recordPassingTests = recordPassingTests;
+  }
 
   @Override
   public void onTestFailure(final TestResult tr) {
-    this.lastFailingTest = Option.some(tr.getDescription());
+    this.failingTests.add(tr.getDescription());
   }
 
   @Override
@@ -42,19 +50,25 @@ public class CheckTestHasFailedResultListener implements TestListener {
 
   @Override
   public void onTestSuccess(final TestResult tr) {
-
+    if (recordPassingTests) {
+      this.succeedingTests.add(tr.getDescription());
+    }
   }
 
   public DetectionStatus status() {
-    if (this.lastFailingTest.hasSome()) {
+    if (!this.failingTests.isEmpty()) {
       return DetectionStatus.KILLED;
     } else {
       return DetectionStatus.SURVIVED;
     }
   }
 
-  public Option<Description> lastFailingTest() {
-    return this.lastFailingTest;
+  public List<Description> getSucceedingTests() {
+    return succeedingTests;
+  }
+
+  public List<Description> getFailingTests() {
+    return failingTests;
   }
 
   public int getNumberOfTestsRun() {

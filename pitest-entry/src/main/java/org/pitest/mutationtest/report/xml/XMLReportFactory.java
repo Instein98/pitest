@@ -14,18 +14,18 @@
  */
 package org.pitest.mutationtest.report.xml;
 
-import java.util.Properties;
-
 import org.pitest.mutationtest.ListenerArguments;
 import org.pitest.mutationtest.MutationResultListener;
 import org.pitest.mutationtest.MutationResultListenerFactory;
+
+import java.util.Properties;
 
 public class XMLReportFactory implements MutationResultListenerFactory {
 
   @Override
   public MutationResultListener getListener(Properties props,
       final ListenerArguments args) {
-    return new XMLReportListener(args.getOutputStrategy());
+    return new XMLReportListener(args.getOutputStrategy(), args.isFullMutationMatrix());
   }
 
   @Override

@@ -1,19 +1,6 @@
 package org.pitest.mutationtest.execute;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.pitest.mutationtest.LocationMother.aLocation;
-import static org.pitest.mutationtest.LocationMother.aMutationId;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import junit.framework.AssertionFailedError;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -30,6 +17,18 @@ import org.pitest.mutationtest.engine.MutationIdentifier;
 import org.pitest.testapi.Description;
 import org.pitest.testapi.ResultCollector;
 import org.pitest.testapi.TestUnit;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.pitest.mutationtest.LocationMother.aLocation;
+import static org.pitest.mutationtest.LocationMother.aMutationId;
 
 public class MutationTestWorkerTest {
 
@@ -54,7 +53,7 @@ public class MutationTestWorkerTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
     this.testee = new MutationTestWorker(this.hotswapper, this.mutater,
-        this.loader);
+        this.loader, false);
   }
 
   @Test

@@ -28,6 +28,7 @@ import static org.pitest.mutationtest.config.ConfigOption.EXCLUDED_TEST_CLASSES;
 import static org.pitest.mutationtest.config.ConfigOption.EXPORT_LINE_COVERAGE;
 import static org.pitest.mutationtest.config.ConfigOption.FAIL_WHEN_NOT_MUTATIONS;
 import static org.pitest.mutationtest.config.ConfigOption.FEATURES;
+import static org.pitest.mutationtest.config.ConfigOption.FULL_MUTATION_MATRIX;
 import static org.pitest.mutationtest.config.ConfigOption.HISTORY_INPUT_LOCATION;
 import static org.pitest.mutationtest.config.ConfigOption.HISTORY_OUTPUT_LOCATION;
 import static org.pitest.mutationtest.config.ConfigOption.INCLUDED_GROUPS;
@@ -115,6 +116,7 @@ public class OptionsParser {
   private final OptionSpec<String>                   excludedGroupsSpec;
   private final OptionSpec<String>                   includedGroupsSpec;
   private final OptionSpec<String>                   includedTestMethodsSpec;
+  private final OptionSpec<Boolean>                  fullMutationMatrixSpec;
   private final OptionSpec<Integer>                  mutationUnitSizeSpec;
   private final ArgumentAcceptingOptionSpec<Boolean> timestampedReportsSpec;
   private final ArgumentAcceptingOptionSpec<Boolean> detectInlinedCode;
@@ -292,6 +294,13 @@ public class OptionsParser {
         .ofType(String.class).withValuesSeparatedBy(',')
         .describedAs("TestNG groups/JUnit categories to include");
 
+    this.fullMutationMatrixSpec = parserAccepts(FULL_MUTATION_MATRIX)
+            .withRequiredArg()
+            .ofType(Boolean.class)
+            .describedAs(
+                    "Whether to create a full mutation matrix")
+            .defaultsTo(FULL_MUTATION_MATRIX.getDefault(Boolean.class));
+
     this.mutationUnitSizeSpec = parserAccepts(MUTATION_UNIT_SIZE)
         .withRequiredArg()
         .ofType(Integer.class)
@@ -373,6 +382,7 @@ public class OptionsParser {
     data.setDependencyAnalysisMaxDistance(this.depth.value(userArgs));
     data.addChildJVMArgs(this.jvmArgs.values(userArgs));
 
+    data.setFullMutationMatrix(this.fullMutationMatrixSpec.value(userArgs));
 
     data.setDetectInlinedCode(userArgs.has(this.detectInlinedCode)
         && userArgs.valueOf(this.detectInlinedCode));

@@ -26,6 +26,7 @@ import org.pitest.plugin.FeatureParameter;
 import org.pitest.process.JavaAgent;
 import org.pitest.process.LaunchOptions;
 import org.pitest.util.Log;
+import org.pitest.util.PitError;
 import org.pitest.util.ResultOutputStrategy;
 import org.pitest.util.Timings;
 
@@ -70,7 +71,9 @@ public class EntryPoint {
       settings.describeFeatures(asInfo("+"), asInfo("-"));
       Log.getLogger().info("---------------------------------------------------------------------------");      
     }
-    
+
+    checkMatrixMode(data);
+
     selectTestPlugin(data);
     
     final ClassPath cp = data.getClassPath();
@@ -122,6 +125,12 @@ public class EntryPoint {
       historyWriter.close();
     }
 
+  }
+
+  private void checkMatrixMode(ReportOptions data) {
+    if (data.isFullMutationMatrix() && !data.getOutputFormats().contains("XML")) {
+      throw new PitError("Full mutation matrix is only supported in the output format XML.");
+    }
   }
 
   private void selectTestPlugin(ReportOptions data) {

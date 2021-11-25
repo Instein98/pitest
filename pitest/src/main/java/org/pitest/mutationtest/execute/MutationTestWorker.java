@@ -14,16 +14,6 @@
  */
 package org.pitest.mutationtest.execute;
 
-import static org.pitest.util.Unchecked.translateCheckedException;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.pitest.classinfo.ClassName;
 import org.pitest.functional.F3;
 import org.pitest.mutationtest.DetectionStatus;
@@ -43,6 +33,17 @@ import org.pitest.testapi.execute.containers.ConcreteResultCollector;
 import org.pitest.testapi.execute.containers.UnContainer;
 import org.pitest.util.Log;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import static org.pitest.util.Unchecked.translateCheckedException;
+
 public class MutationTestWorker {
 
   private static final Logger                               LOG   = Log
@@ -55,13 +56,15 @@ public class MutationTestWorker {
   private final Mutater                                     mutater;
   private final ClassLoader                                 loader;
   private final F3<ClassName, ClassLoader, byte[], Boolean> hotswap;
+  private final boolean                                     fullMutationMatrix;
 
   public MutationTestWorker(
       final F3<ClassName, ClassLoader, byte[], Boolean> hotswap,
-      final Mutater mutater, final ClassLoader loader) {
+      final Mutater mutater, final ClassLoader loader, final boolean fullMutationMatrix) {
     this.loader = loader;
     this.mutater = mutater;
     this.hotswap = hotswap;
+    this.fullMutationMatrix = fullMutationMatrix;
   }
 
   protected void run(final Collection<MutationDetails> range, final Reporter r,
@@ -178,10 +181,15 @@ public class MutationTestWorker {
   private MutationStatusTestPair doTestsDetectMutation(final Container c,
       final List<TestUnit> tests) {
     try {
-      final CheckTestHasFailedResultListener listener = new CheckTestHasFailedResultListener();
+      final CheckTestHasFailedResultListener listener = new CheckTestHasFailedResultListener(fullMutationMatrix);
 
       final Pitest pit = new Pitest(listener);
-      pit.run(c, createEarlyExitTestGroup(tests));
+
+      if (this.fullMutationMatrix) {
+        pit.run(c, tests);
+      } else {
+        pit.run(c, createEarlyExitTestGroup(tests));
+      }
 
       return createStatusTestPair(listener);
     } catch (final Exception ex) {
@@ -191,15 +199,13 @@ public class MutationTestWorker {
   }
 
   private MutationStatusTestPair createStatusTestPair(
-      final CheckTestHasFailedResultListener listener) {
-    if (listener.lastFailingTest().hasSome()) {
-      return new MutationStatusTestPair(listener.getNumberOfTestsRun(),
-          listener.status(), listener.lastFailingTest().value()
-              .getQualifiedName());
-    } else {
-      return new MutationStatusTestPair(listener.getNumberOfTestsRun(),
-          listener.status());
-    }
+          final CheckTestHasFailedResultListener listener) {
+    List<String> failingTests = listener.getFailingTests().stream()
+            .map(description -> description.getQualifiedName()).collect(Collectors.toList());
+    List<String> succeedingTests = listener.getSucceedingTests().stream()
+            .map(description -> description.getQualifiedName()).collect(Collectors.toList());
+    return new MutationStatusTestPair(listener.getNumberOfTestsRun(),
+            listener.status(), failingTests, succeedingTests);
   }
 
   private List<TestUnit> createEarlyExitTestGroup(final List<TestUnit> tests) {

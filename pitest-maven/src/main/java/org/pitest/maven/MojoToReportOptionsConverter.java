@@ -14,16 +14,6 @@
  */
 package org.pitest.maven;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.model.Plugin;
@@ -38,6 +28,9 @@ import org.pitest.functional.predicate.Predicate;
 import org.pitest.mutationtest.config.ReportOptions;
 import org.pitest.testapi.TestGroupConfig;
 import org.pitest.util.Glob;
+
+import java.io.File;
+import java.util.*;
 
 public class MojoToReportOptionsConverter {
 
@@ -132,6 +125,8 @@ public class MojoToReportOptionsConverter {
     data.addOutputFormats(determineOutputFormats());
 
     setTestGroups(data);
+
+    data.setFullMutationMatrix(this.mojo.isFullMutationMatrix());
 
     data.setMutationUnitSize(this.mojo.getMutationUnitSize());
     data.setShouldCreateTimestampedReports(this.mojo.isTimestampedReports());

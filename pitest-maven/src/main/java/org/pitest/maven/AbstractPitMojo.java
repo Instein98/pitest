@@ -1,13 +1,5 @@
 package org.pitest.maven;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -24,8 +16,11 @@ import org.pitest.mutationtest.tooling.CombinedStatistics;
 import org.pitest.plugin.ClientClasspathPlugin;
 import org.pitest.plugin.ToolClasspathPlugin;
 import org.slf4j.bridge.SLF4JBridgeHandler;
-
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
+
+import java.io.File;
+import java.util.*;
+import java.util.logging.Logger;
 
 public class AbstractPitMojo extends AbstractMojo {
 
@@ -215,6 +210,17 @@ public class AbstractPitMojo extends AbstractMojo {
    */
   @Parameter(property = "includedTestMethods")
   private ArrayList<String>           includedTestMethods;
+
+  /**
+   * Whether to create a full mutation matrix.
+   *
+   * If set to true all tests covering a mutation will be executed,
+   * if set to false the test execution will stop after the first killing test.
+   */
+  @Parameter(property = "fullMutationMatrix", defaultValue = "false")
+
+  private boolean                     fullMutationMatrix;
+
   /**
    * Maximum number of mutations to include in a single analysis unit.
    * 
@@ -537,6 +543,14 @@ public class AbstractPitMojo extends AbstractMojo {
 
   public List<String> getIncludedTestMethods() {
     return this.includedTestMethods;
+  }
+
+  public boolean isFullMutationMatrix() {
+    return fullMutationMatrix;
+  }
+
+  public void setFullMutationMatrix(boolean fullMutationMatrix) {
+    this.fullMutationMatrix = fullMutationMatrix;
   }
 
   public int getMutationUnitSize() {

@@ -32,7 +32,7 @@ public class CheckTestHasFailedResultListenerTest {
 
   @Before
   public void setUp() {
-    this.testee = new CheckTestHasFailedResultListener();
+    this.testee = new CheckTestHasFailedResultListener(false);
     this.description = DescriptionMother.createEmptyDescription("foo");
   }
 
@@ -51,7 +51,7 @@ public class CheckTestHasFailedResultListenerTest {
   @Test
   public void shouldRecordDescriptionOfLastFailingTest() {
     this.testee.onTestFailure(new TestResult(this.description, null));
-    assertEquals(Option.some(this.description), this.testee.lastFailingTest());
+    assertEquals(Option.some(this.description), this.testee.getFailingTests().get(0));
   }
 
   @Test
