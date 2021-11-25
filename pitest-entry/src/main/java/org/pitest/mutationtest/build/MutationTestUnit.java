@@ -15,8 +15,13 @@
 package org.pitest.mutationtest.build;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import org.pitest.classinfo.ClassName;
@@ -100,29 +105,47 @@ public class MutationTestUnit implements MutationAnalysisUnit {
       crashedRuns.retainAll(remainingMutations);
 
       LOG.info("Rerunning " + crashedRuns.size() + " mutant(s) because of minion crash");
+      ExecutorService es = Executors.newWorkStealingPool();
       for (MutationDetails d : crashedRuns) {
         MutationStatusTestPair result = null;
+        final List<MutationStatusTestPair> rerunResults = new CopyOnWriteArrayList<>();
+        final List<TestInfo> testInfos = new CopyOnWriteArrayList<>();
         for (TestInfo t : d.getTestsInOrder()) {
-          MutationDetails singleTest = new MutationDetails(new MutationIdentifier(d.getId().getLocation(),
-                  d.getId().getIndexes(),d.getMutator()), d.getFilename(), d.getDescription(),
-                  d.getLineNumber(), d.getBlock());
-          singleTest.addTestsInOrder(Collections.singleton(t));
-          worker = this.workerFactory.createWorker(Collections.singleton(singleTest), this.testClasses);
-          worker.start();
-          exitCode = waitForMinionToDie(worker);
-          MutationStatusTestPair r = worker.results(singleTest);
+          es.submit(new Runnable() {
+            @Override
+            public void run() {
+              MutationDetails singleTest = new MutationDetails(new MutationIdentifier(d.getId().getLocation(),
+                      d.getId().getIndexes(),d.getMutator()), d.getFilename(), d.getDescription(),
+                      d.getLineNumber(), d.getBlock());
+              singleTest.addTestsInOrder(Collections.singleton(t));
+              MutationTestProcess worker = workerFactory.createWorker(Collections.singleton(singleTest), testClasses);
+              try {
+                worker.start();
+              } catch (IOException e) {
+                e.printStackTrace();
+              } catch (InterruptedException e) {
+                e.printStackTrace();
+              }
+              ExitCode exitCode = waitForMinionToDie(worker);
+              MutationStatusTestPair r = worker.results(singleTest);
 
-          if (exitCode != ExitCode.OK) {
-            r.setErrorStatusAndName(DetectionStatus.getForErrorExitCode(exitCode), t.getName());
-          }
-
+              if (exitCode != ExitCode.OK) {
+                r.setErrorStatusAndName(DetectionStatus.getForErrorExitCode(exitCode), t.getName());
+              }
+              rerunResults.add(r);
+              testInfos.add(t);
+            }
+          });
+        }
+        for (int i = 0; i < rerunResults.size(); i ++){
+          MutationStatusTestPair r = rerunResults.get(i);
+          TestInfo t = testInfos.get(i);
           if (result == null) {
             result = r;
           } else {
             result.accumulate(r, t.getName());
           }
         }
-
         if (result != null) {
           mutations.setStatusForMutation(d, result);
         }
