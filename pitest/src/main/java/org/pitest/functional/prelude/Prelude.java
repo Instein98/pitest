@@ -22,10 +22,7 @@ import java.util.Map;
 
 import org.pitest.functional.F;
 import org.pitest.functional.SideEffect1;
-import org.pitest.functional.predicate.And;
-import org.pitest.functional.predicate.Not;
-import org.pitest.functional.predicate.Or;
-import org.pitest.functional.predicate.Predicate;
+import org.pitest.functional.predicate.*;
 
 /**
  * @author henry
@@ -49,6 +46,11 @@ public abstract class Prelude {
   @SafeVarargs
   public static final <A> Or<A> or(final Predicate<A>... ps) {
     return new Or<>(Arrays.asList(ps));
+  }
+
+  @SafeVarargs
+  public static final <A> Or2<A> or2(final java.util.function.Predicate<A>... ps) {
+    return new Or2<>(Arrays.asList(ps));
   }
 
   public static final <A> Or<A> or(final Iterable<Predicate<A>> ps) {

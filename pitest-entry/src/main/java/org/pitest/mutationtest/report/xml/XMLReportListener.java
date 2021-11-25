@@ -31,7 +31,7 @@ import java.util.Optional;
 import static org.pitest.mutationtest.report.xml.Tag.*;
 
 enum Tag {
-  mutation, sourceFile, mutatedClass, mutatedMethod, methodDescription, lineNumber, mutator, index, killingTest, killingTests, succeedingTests, description, block;
+  mutation, sourceFile, mutatedClass, mutatedMethod, methodDescription, lineNumber, mutator, index, killingTest, killingTests, succeedingTests, description, block, timeoutTests, runErrorTests, memoryErrorTests;;
 }
 
 public class XMLReportListener implements MutationResultListener {
@@ -84,6 +84,12 @@ public class XMLReportListener implements MutationResultListener {
             createTestDesc(mutation.getKillingTests()), killingTests)
             + makeNodeWhenConditionSatisfied(fullMutationMatrix,
             createTestDesc(mutation.getSucceedingTests()), succeedingTests)
+            + makeNodeWhenConditionSatisfied(fullMutationMatrix,
+            createTestDesc(mutation.getTimeoutTests()), timeoutTests)
+            + makeNodeWhenConditionSatisfied(fullMutationMatrix,
+            createTestDesc(mutation.getRunErrorTests()), runErrorTests)
+            + makeNodeWhenConditionSatisfied(fullMutationMatrix,
+            createTestDesc(mutation.getMemoryErrorTests()), memoryErrorTests)
             + makeNode(clean(details.getDescription()), description);
   }
 

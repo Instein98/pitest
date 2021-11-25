@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Functional programming style operations for plain old Java iterables.
@@ -44,6 +46,22 @@ public abstract class FCollection {
   public static <A, B> FunctionalList<B> map(final Iterable<? extends A> as,
       final F<A, B> f) {
     final FunctionalList<B> bs = emptyList();
+    mapTo(as, f, bs);
+    return bs;
+  }
+
+  public static <A, B> void mapTo(final Iterable<? extends A> as,
+                                  final Function<A, B> f, final Collection<? super B> bs) {
+    if (as != null) {
+      for (final A a : as) {
+        bs.add(f.apply(a));
+      }
+    }
+  }
+
+  public static <A, B> List<B> map(final Iterable<? extends A> as,
+                                   final Function<A, B> f) {
+    final List<B> bs = emptyList();
     mapTo(as, f, bs);
     return bs;
   }
@@ -85,7 +103,22 @@ public abstract class FCollection {
       }
     }
   }
-  
+
+  public static <T> List<T> filter(final Iterable<? extends T> xs,
+                                   final Predicate<T> predicate) {
+    final List<T> dest = emptyList();
+    filter(xs, predicate, dest);
+    return dest;
+  }
+
+  public static <T> void filter(final Iterable<? extends T> xs,
+                                final Predicate<T> predicate, final Collection<? super T> dest) {
+    for (final T x : xs) {
+      if (predicate.test(x)) {
+        dest.add(x);
+      }
+    }
+  }
 
   public static <T> Option<T> findFirst(final Iterable<? extends T> xs,
       final F<T, Boolean> predicate) {
