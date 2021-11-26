@@ -16,6 +16,11 @@ package org.pitest.mutationtest;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.logging.Logger;
+
+import org.pitest.coverage.TestInfo;
+import org.pitest.testapi.Description;
+import org.pitest.util.Log;
 
 public final class MutationStatusTestPair implements Serializable {
   
@@ -28,6 +33,9 @@ public final class MutationStatusTestPair implements Serializable {
   private final List<String>    timeOutTests;
   private final List<String>    runErrorTests;
   private final List<String>    memoryErrorTests;
+  private long                   mutationExecutionTime = 0;
+  private Map<Description, Long> testsDescExecutionTimeMap = new HashMap();
+  private static final Logger LOG = Log.getLogger();
 
   public MutationStatusTestPair(int testsRun, DetectionStatus status) {
     this(testsRun, status, Collections.emptyList(), Collections.emptyList(),
@@ -100,6 +108,26 @@ public final class MutationStatusTestPair implements Serializable {
     return this.numberOfTestsRun;
   }
 
+  public void setDescTestsExecutionTime(Map<Description, Long> testsDescExecutionTimeMap)
+  {
+    this.testsDescExecutionTimeMap = testsDescExecutionTimeMap;
+  }
+
+  public Map<Description, Long> getTestsExecutionTime()
+  {
+    return this.testsDescExecutionTimeMap;
+  }
+
+  public long getMutationExecutionTime()
+  {
+    return this.mutationExecutionTime;
+  }
+
+  public void setMutationExecutionTime(long mutationExecutionTime)
+  {
+    this.mutationExecutionTime = mutationExecutionTime;
+  }
+
   @Override
   public String toString() {
     if (this.killingTests.isEmpty()) {
@@ -157,8 +185,11 @@ public final class MutationStatusTestPair implements Serializable {
     return true;
   }
 
-  public void accumulate(MutationStatusTestPair status, String testName) {
+  public void accumulate(MutationStatusTestPair status, TestInfo test, long executionTime) {
+    String testName = test.getName();
     this.numberOfTestsRun += status.numberOfTestsRun;
+    this.mutationExecutionTime += status.mutationExecutionTime;
+    this.testsDescExecutionTimeMap.putAll(status.testsDescExecutionTimeMap);
 
     if (status.status.equals(DetectionStatus.KILLED)) {
       if (!this.killingTests.contains(testName)) {
@@ -179,6 +210,9 @@ public final class MutationStatusTestPair implements Serializable {
       }
       this.succeedingTests.remove(testName);
     } else if (status.status.equals(DetectionStatus.TIMED_OUT)) {
+//      LOG.info("********************** Approximate TIME_OUT cost:" + executionTime + " **********************");
+      Description testDesc = new Description(testName, test.getDefiningClass());
+      this.testsDescExecutionTimeMap.put(testDesc, executionTime);
       if (!this.timeOutTests.contains(testName)) {
         this.timeOutTests.add(testName);
       }

@@ -14,16 +14,23 @@
  */
 package org.pitest.mutationtest.execute;
 
+import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Logger;
 
 import org.pitest.extension.common.TestUnitDecorator;
 import org.pitest.functional.SideEffect;
 import org.pitest.mutationtest.TimeoutLengthStrategy;
+import org.pitest.testapi.Description;
 import org.pitest.testapi.ResultCollector;
+import org.pitest.testapi.TestResult;
 import org.pitest.testapi.TestUnit;
+import org.pitest.testapi.execute.ExitingResultCollector;
+import org.pitest.testapi.execute.containers.ConcreteResultCollector;
+import org.pitest.util.Log;
 import org.pitest.util.Unchecked;
 
 public final class MutationTimeoutDecorator extends TestUnitDecorator {
@@ -31,6 +38,7 @@ public final class MutationTimeoutDecorator extends TestUnitDecorator {
   private final TimeoutLengthStrategy timeOutStrategy;
   private final SideEffect            timeOutSideEffect;
   private final long                  executionTime;
+  private static final Logger LOG = Log.getLogger();
 
   public MutationTimeoutDecorator(final TestUnit child,
       final SideEffect timeOutSideEffect,
@@ -48,7 +56,28 @@ public final class MutationTimeoutDecorator extends TestUnitDecorator {
         .getAllowedTime(this.executionTime);
 
     final FutureTask<?> future = createFutureForChildTestUnit(rc);
+    long t0 = System.currentTimeMillis();
     executeFutureWithTimeOut(maxTime, future, rc);
+    long testExecutionTime = System.currentTimeMillis() - t0;
+    // LOG.info("I can execute and print");
+    if (rc instanceof ExitingResultCollector)
+    {
+      // LOG.info("This is a ExitingResultCollector");
+      ExitingResultCollector erc = (ExitingResultCollector) rc;
+      ResultCollector childCollector = erc.getChild();
+      if (childCollector instanceof ConcreteResultCollector)
+      {
+        // LOG.info("This is a ConcreteResultCollector");
+        ConcreteResultCollector crc = (ConcreteResultCollector) childCollector;
+        Collection<TestResult> feedback = crc.getFeedback();
+        if (!future.isDone()){
+//          LOG.info("********************** Accurate TIME_OUT cost:" + testExecutionTime + " **********************");
+        }
+        feedback.add(new TestResult(new Description("testExecutionTime:" + this.child().getDescription().getFirstTestClass() + "#" + this.child().getDescription().getName()
+                + "-" + testExecutionTime), null));
+        // LOG.info("testExecutionTime:" + this.child().getDescription() + "-" + testExecutionTime);
+      }
+    }
     if (!future.isDone()) {
       this.timeOutSideEffect.apply();
     }
@@ -56,7 +85,7 @@ public final class MutationTimeoutDecorator extends TestUnitDecorator {
   }
 
   private void executeFutureWithTimeOut(final long maxTime,
-      final FutureTask<?> future, final ResultCollector rc) {
+                                        final FutureTask<?> future, final ResultCollector rc) {
     try {
       future.get(maxTime, TimeUnit.MILLISECONDS);
     } catch (final TimeoutException ex) {

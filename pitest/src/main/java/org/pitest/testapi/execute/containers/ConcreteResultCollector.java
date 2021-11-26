@@ -58,4 +58,8 @@ public final class ConcreteResultCollector implements ResultCollector {
     return false;
   }
 
+  public Collection<TestResult> getFeedback()
+  {
+    return this.feedback;
+  }
 }

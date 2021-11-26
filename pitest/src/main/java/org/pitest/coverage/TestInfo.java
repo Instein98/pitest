@@ -44,6 +44,10 @@ public final class TestInfo implements Serializable {
     return this.name;
   }
 
+  public String getDefiningClass() {
+    return definingClass;
+  }
+
   public int getTime() {
     return this.time;
   }

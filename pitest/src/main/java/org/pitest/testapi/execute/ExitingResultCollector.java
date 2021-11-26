@@ -55,4 +55,9 @@ public class ExitingResultCollector implements ResultCollector {
     this.child.notifyEnd(description);
   }
 
+  public ResultCollector getChild()
+  {
+    return this.child;
+  }
+
 }

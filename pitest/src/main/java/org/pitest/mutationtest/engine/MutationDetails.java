@@ -15,13 +15,13 @@
 package org.pitest.mutationtest.engine;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import org.pitest.classinfo.ClassName;
 import org.pitest.coverage.ClassLine;
 import org.pitest.coverage.TestInfo;
+import org.pitest.testapi.Description;
+import org.pitest.util.Commons;
 import org.pitest.util.Preconditions;
 import org.pitest.util.StringUtil;
 
@@ -40,6 +40,9 @@ public final class MutationDetails implements Serializable {
   private final ArrayList<TestInfo> testsInOrder = new ArrayList<>();
   private final boolean             isInFinallyBlock;
   private final PoisonStatus        poison;
+  private long                      patchExecutionTime = 0;
+  private Map<String, Long> mutationTestsTime = new HashMap<>();
+  private Map<Description, Long> mutationDescTestsTime = new HashMap<>();
 
   public MutationDetails(final MutationIdentifier id, final String filename,
       final String description, final int lineNumber, final int block) {
@@ -207,7 +210,7 @@ public final class MutationDetails implements Serializable {
    * Returns the basic block in which this mutation occurs. See
    * https://github.com/hcoles/pitest/issues/131 for discussion on block
    * coverage
-   * 
+   *
    * @return the block within the method that this mutation is located in
    */
   public int getBlock() {
@@ -216,7 +219,7 @@ public final class MutationDetails implements Serializable {
 
   /**
    * Returns true if this mutation has a matching identifier
-   * 
+   *
    * @param id
    *          the MutationIdentifier to match
    * @return true if the MutationIdentifier matches otherwise false
@@ -227,7 +230,7 @@ public final class MutationDetails implements Serializable {
 
   /**
    * Returns the name of the mutator that created this mutation
-   * 
+   *
    * @return the mutator name
    */
   public String getMutator() {
@@ -243,7 +246,7 @@ public final class MutationDetails implements Serializable {
   public int getFirstIndex() {
     return this.id.getFirstIndex();
   }
-  
+
   /**
    * Zero based index to first affected ASM instruction
    * @return
@@ -254,11 +257,66 @@ public final class MutationDetails implements Serializable {
 
   /**
    * Indicates if the mutation is within a finally block
-   * 
+   *
    * @return true if in finally block otherwise false
    */
   public boolean isInFinallyBlock() {
     return this.isInFinallyBlock;
+  }
+
+  /**
+   * Record time of executing a patch
+   * @author: Jun Yang
+   */
+  public void setPatchExecutionTime(long time)
+  {
+    this.patchExecutionTime = time;
+  }
+
+  /**
+   * Add time of running a test on the patch
+   * @author: Jun Yang
+   */
+  public void addTestTime(Description ds, long time)
+  {
+    this.mutationDescTestsTime.put(ds, time);
+  }
+
+  /**
+   * Get time of executing the patch
+   * @author: Jun Yang
+   */
+  public long getPatchExecutionTime()
+  {
+    return this.patchExecutionTime;
+  }
+
+  /**
+   * Get time of tests of the patch
+   * @author: Jun Yang
+   */
+  public Map<String, Long> getTestsTimeMap()
+  {
+    return Commons.getStringMapFromDescMap(this.mutationDescTestsTime);
+  }
+
+  public Map<Description, Long> getDescTestsTimeMap()
+  {
+    return this.mutationDescTestsTime;
+  }
+
+  /**
+   * Set time of tests of the patch
+   * @author: Jun Yang
+   */
+  public void setTestsTimeMap(Map<String, Long> mutationTestsTime)
+  {
+    this.mutationTestsTime = mutationTestsTime;
+  }
+
+  public void setDescTestTimeMap(Map<Description, Long> mutationDescTestsTime)
+  {
+    this.mutationDescTestsTime = mutationDescTestsTime;
   }
 
   @Override

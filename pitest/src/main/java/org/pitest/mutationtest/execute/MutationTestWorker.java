@@ -18,10 +18,7 @@ import org.pitest.classinfo.ClassName;
 import org.pitest.functional.F3;
 import org.pitest.mutationtest.DetectionStatus;
 import org.pitest.mutationtest.MutationStatusTestPair;
-import org.pitest.mutationtest.engine.Mutant;
-import org.pitest.mutationtest.engine.Mutater;
-import org.pitest.mutationtest.engine.MutationDetails;
-import org.pitest.mutationtest.engine.MutationIdentifier;
+import org.pitest.mutationtest.engine.*;
 import org.pitest.mutationtest.mocksupport.JavassistInterceptor;
 import org.pitest.testapi.TestResult;
 import org.pitest.testapi.TestUnit;
@@ -33,7 +30,9 @@ import org.pitest.testapi.execute.containers.ConcreteResultCollector;
 import org.pitest.testapi.execute.containers.UnContainer;
 import org.pitest.util.Log;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -81,12 +80,35 @@ public class MutationTestWorker {
             + " ms.");
       }
     }
+  }
+
+  @Deprecated
+  private void storeMutationDetails(String filePath, Collection<MutationDetails> range)
+  {
+    try {
+      List<SimplifiedMutationDetails> simplifiedMutationDetailsList = new ArrayList<>();
+      for (MutationDetails md : range)
+      {
+        simplifiedMutationDetailsList.add(new SimplifiedMutationDetails(md));
+      }
+      FileOutputStream fileOut = new FileOutputStream(filePath);
+      ObjectOutputStream out = new ObjectOutputStream(fileOut);
+      out.writeObject(simplifiedMutationDetailsList);
+      out.close();
+      fileOut.close();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      // System.exit(0);
+    }
 
   }
 
   private void processMutation(final Reporter r,
       final TimeOutDecoratedTestSource testSource,
       final MutationDetails mutationDetails) throws IOException {
+
+    long t0 = System.currentTimeMillis();
 
     final MutationIdentifier mutationId = mutationDetails.getId();
     final Mutant mutatedClass = this.mutater.getMutation(mutationId);
@@ -107,6 +129,10 @@ public class MutationTestWorker {
     final MutationStatusTestPair mutationDetected = handleMutation(
         mutationDetails, mutatedClass, relevantTests);
 
+    mutationDetails.setDescTestTimeMap(mutatedClass.getDetails().getDescTestsTimeMap());
+
+    long patchExecutionTime = System.currentTimeMillis() - t0;
+    mutationDetected.setMutationExecutionTime(patchExecutionTime);
     r.report(mutationId, mutationDetected);
     if (DEBUG) {
       LOG.fine("Mutation " + mutationId + " detected = " + mutationDetected);
@@ -147,7 +173,7 @@ public class MutationTestWorker {
         LOG.fine("replaced class with mutant in "
             + (System.currentTimeMillis() - t0) + " ms");
       }
-      mutationDetected = doTestsDetectMutation(c, relevantTests);
+      mutationDetected = doTestsDetectMutation(c, relevantTests, mutatedClass);
     } else {
       LOG.warning("Mutation " + mutationId + " was not viable ");
       mutationDetected = new MutationStatusTestPair(0,
@@ -179,17 +205,18 @@ public class MutationTestWorker {
   }
 
   private MutationStatusTestPair doTestsDetectMutation(final Container c,
-      final List<TestUnit> tests) {
+                                                       final List<TestUnit> tests, Mutant mutedClass) {
     try {
-      final CheckTestHasFailedResultListener listener = new CheckTestHasFailedResultListener(fullMutationMatrix);
+      final CheckTestHasFailedResultWithTimingListener listener = new CheckTestHasFailedResultWithTimingListener(fullMutationMatrix);
 
       final Pitest pit = new Pitest(listener);
 
       if (this.fullMutationMatrix) {
-        pit.run(c, tests);
+        pit.run(c, tests, mutedClass);
       } else {
-        pit.run(c, createEarlyExitTestGroup(tests));
+        pit.run(c, createEarlyExitTestGroup(tests), mutedClass);
       }
+      listener.setDescTestsExecutionTime(mutedClass.getDetails().getDescTestsTimeMap());
 
       return createStatusTestPair(listener);
     } catch (final Exception ex) {
@@ -206,6 +233,20 @@ public class MutationTestWorker {
             .map(description -> description.getQualifiedName()).collect(Collectors.toList());
     return new MutationStatusTestPair(listener.getNumberOfTestsRun(),
             listener.status(), failingTests, succeedingTests);
+  }
+
+  // Todo
+  private MutationStatusTestPair createStatusTestPair(
+          final CheckTestHasFailedResultWithTimingListener listener) {
+    List<String> failingTests = listener.getFailingTests().stream()
+            .map(description -> description.getQualifiedName()).collect(Collectors.toList());
+    List<String> succeedingTests = listener.getSucceedingTests().stream()
+            .map(description -> description.getQualifiedName())
+            .filter(x -> !x.startsWith("testExecutionTime:")).collect(Collectors.toList());
+    MutationStatusTestPair mstp = new MutationStatusTestPair(listener.getNumberOfTestsRun(),
+            listener.status(), failingTests, succeedingTests);
+    mstp.setDescTestsExecutionTime(listener.getDescTestsExecutionTime());
+    return mstp;
   }
 
   private List<TestUnit> createEarlyExitTestGroup(final List<TestUnit> tests) {

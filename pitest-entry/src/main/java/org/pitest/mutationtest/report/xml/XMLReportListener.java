@@ -17,7 +17,9 @@ package org.pitest.mutationtest.report.xml;
 import org.pitest.mutationtest.ClassMutationResults;
 import org.pitest.mutationtest.MutationResult;
 import org.pitest.mutationtest.MutationResultListener;
+import org.pitest.mutationtest.MutationStatusTestPair;
 import org.pitest.mutationtest.engine.MutationDetails;
+import org.pitest.testapi.Description;
 import org.pitest.util.ResultOutputStrategy;
 import org.pitest.util.StringUtil;
 import org.pitest.util.Unchecked;
@@ -26,12 +28,14 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.pitest.mutationtest.report.xml.Tag.*;
 
 enum Tag {
-  mutation, sourceFile, mutatedClass, mutatedMethod, methodDescription, lineNumber, mutator, index, killingTest, killingTests, succeedingTests, description, block, timeoutTests, runErrorTests, memoryErrorTests;;
+  mutation, sourceFile, mutatedClass, mutatedMethod, methodDescription, lineNumber, mutator, index, killingTest, killingTests, succeedingTests, description, block, timeoutTests, runErrorTests, memoryErrorTests,
+  patchExecutionTime, test, time, name, testsExecutionTime
 }
 
 public class XMLReportListener implements MutationResultListener {
@@ -69,6 +73,7 @@ public class XMLReportListener implements MutationResultListener {
 
   private String makeMutationNode(final MutationResult mutation) {
     final MutationDetails details = mutation.getDetails();
+    MutationStatusTestPair mstp = mutation.getStatusTestPair();
     return makeNode(clean(details.getFilename()), sourceFile)
             + makeNode(clean(details.getClassName().asJavaName()), mutatedClass)
             + makeNode(clean(details.getMethod().name()), mutatedMethod)
@@ -90,7 +95,9 @@ public class XMLReportListener implements MutationResultListener {
             createTestDesc(mutation.getRunErrorTests()), runErrorTests)
             + makeNodeWhenConditionSatisfied(fullMutationMatrix,
             createTestDesc(mutation.getMemoryErrorTests()), memoryErrorTests)
-            + makeNode(clean(details.getDescription()), description);
+            + makeNode(clean(details.getDescription()), description)
+            + makeNode(getRunTestNodes(mstp.getTestsExecutionTime()), testsExecutionTime);
+//            + makeNode(String.valueOf(mstp.getMutationExecutionTime()) + "ms", patchExecutionTime);
   }
 
   private String clean(final String value) {
@@ -154,6 +161,25 @@ public class XMLReportListener implements MutationResultListener {
     } catch (final IOException e) {
       throw Unchecked.translateCheckedException(e);
     }
+  }
+
+  /**
+   * Prepare to make test time nodes
+   * @author: Jun Yang
+   */
+  private String getRunTestNodes(Map<Description, Long> testTimeMap)
+  {
+    String testNodes = "";
+    long t0 = System.currentTimeMillis();
+
+    for (Map.Entry<Description, Long>entry : testTimeMap.entrySet())
+    {
+      String nameNode = makeNode(entry.getKey().getQualifiedName(), name);
+      String timeNode = makeNode(entry.getValue().toString() + "ms", time);
+      String testNode = makeNode(nameNode + timeNode, test);
+      testNodes += testNode;
+    }
+    return testNodes;
   }
 
   @Override

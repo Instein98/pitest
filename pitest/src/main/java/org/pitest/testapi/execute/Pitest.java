@@ -20,10 +20,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.pitest.testapi.Configuration;
-import org.pitest.testapi.TestListener;
-import org.pitest.testapi.TestResult;
-import org.pitest.testapi.TestUnit;
+import org.pitest.mutationtest.engine.Mutant;
+import org.pitest.testapi.*;
 import org.pitest.util.Log;
 import org.pitest.util.PitError;
 
@@ -39,7 +37,7 @@ public class Pitest {
 
   // entry point for mutation testing
   public void run(final Container container,
-      final List<? extends TestUnit> testUnits) {
+                  final List<? extends TestUnit> testUnits) {
 
     LOG.fine("Running " + testUnits.size() + " units");
 
@@ -51,10 +49,47 @@ public class Pitest {
 
   }
 
+  //new entry point here!
+  public void run(final Container container,
+                  final List<? extends TestUnit> testUnits, Mutant mutedClass) {
+
+    LOG.fine("Running " + testUnits.size() + " units");
+
+    signalRunStartToAllListeners();
+
+    executeTests(container, testUnits, mutedClass);
+
+    signalRunEndToAllListeners();
+
+  }
+
   private void executeTests(final Container container,
       final List<? extends TestUnit> testUnits) {
     for (final TestUnit unit : testUnits) {
+      long t0 = System.currentTimeMillis();
       final List<TestResult> results = container.execute(unit);
+      processResults(results);
+    }
+  }
+
+  //new funtion here!
+  private void executeTests(final Container container,
+                            final List<? extends TestUnit> testUnits, Mutant mutedClass) {
+    for (final TestUnit unit : testUnits) {
+      final List<TestResult> results = container.execute(unit);
+      for (TestResult tr : results)
+      {
+        if (tr.getDescription().getName().startsWith("testExecutionTime:"))
+        {
+          String descName = tr.getDescription().getName();
+          String test = descName.substring(descName.lastIndexOf(":") + 1);
+          String testFullName = test.split("-")[0];
+          String testTime = test.split("-")[1];
+          String testClassName = testFullName.split("#")[0];
+          String testShortName = testFullName.split("#")[1];
+          mutedClass.getDetails().addTestTime(new Description(testShortName, testClassName), Long.parseLong(testTime));
+        }
+      }
       processResults(results);
     }
   }
@@ -75,6 +110,7 @@ public class Pitest {
 
   private void processResults(final List<TestResult> results) {
     for (final TestResult result : results) {
+      if (result.getDescription().getName().startsWith("testExecutionTime-")) continue;
       final ResultType classifiedResult = classify(result);
       classifiedResult.getListenerFunction(result).apply(listener);
     }
