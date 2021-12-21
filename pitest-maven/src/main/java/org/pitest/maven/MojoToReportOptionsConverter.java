@@ -30,7 +30,14 @@ import org.pitest.testapi.TestGroupConfig;
 import org.pitest.util.Glob;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 public class MojoToReportOptionsConverter {
 

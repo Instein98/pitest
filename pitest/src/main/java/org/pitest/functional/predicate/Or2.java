@@ -14,7 +14,6 @@
  */
 package org.pitest.functional.predicate;
 
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Predicate;

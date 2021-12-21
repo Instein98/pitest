@@ -14,13 +14,19 @@
  */
 package org.pitest.mutationtest;
 
-import java.io.Serializable;
-import java.util.*;
-import java.util.logging.Logger;
-
 import org.pitest.coverage.TestInfo;
 import org.pitest.testapi.Description;
 import org.pitest.util.Log;
+
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.logging.Logger;
 
 public final class MutationStatusTestPair implements Serializable {
   
@@ -108,23 +114,19 @@ public final class MutationStatusTestPair implements Serializable {
     return this.numberOfTestsRun;
   }
 
-  public void setDescTestsExecutionTime(Map<Description, Long> testsDescExecutionTimeMap)
-  {
+  public void setDescTestsExecutionTime(Map<Description, Long> testsDescExecutionTimeMap) {
     this.testsDescExecutionTimeMap = testsDescExecutionTimeMap;
   }
 
-  public Map<Description, Long> getTestsExecutionTime()
-  {
+  public Map<Description, Long> getTestsExecutionTime() {
     return this.testsDescExecutionTimeMap;
   }
 
-  public long getMutationExecutionTime()
-  {
+  public long getMutationExecutionTime() {
     return this.mutationExecutionTime;
   }
 
-  public void setMutationExecutionTime(long mutationExecutionTime)
-  {
+  public void setMutationExecutionTime(long mutationExecutionTime) {
     this.mutationExecutionTime = mutationExecutionTime;
   }
 

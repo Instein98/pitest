@@ -1,9 +1,5 @@
 package org.pitest.mutationtest.incremental;
 
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.logging.Logger;
-
 import org.pitest.classinfo.ClassName;
 import org.pitest.coverage.CoverageDatabase;
 import org.pitest.coverage.TestInfo;
@@ -16,6 +12,15 @@ import org.pitest.mutationtest.MutationResult;
 import org.pitest.mutationtest.MutationStatusTestPair;
 import org.pitest.mutationtest.engine.MutationDetails;
 import org.pitest.util.Log;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 public class IncrementalAnalyser implements MutationAnalyser {
 

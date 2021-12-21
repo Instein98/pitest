@@ -19,7 +19,11 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class AbstractPitMojo extends AbstractMojo {
@@ -48,7 +52,7 @@ public class AbstractPitMojo extends AbstractMojo {
    * Tests to run
    */
   @Parameter(property = "targetTests")
-  protected ArrayList<String>         targetTests;
+  protected ArrayList<String> targetTests;
 
   /**
    * Methods not to mutate
@@ -330,7 +334,7 @@ public class AbstractPitMojo extends AbstractMojo {
    * Value pairs may be used by pitest plugins.
    */
   @Parameter
-  private Map<String, String>         environmentVariables = new HashMap<>();
+  private Map<String, String> environmentVariables = new HashMap<>();
 
   /**
    * <i>Internal</i>: Project to interact with.

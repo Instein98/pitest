@@ -18,7 +18,11 @@ import org.pitest.classinfo.ClassName;
 import org.pitest.functional.F3;
 import org.pitest.mutationtest.DetectionStatus;
 import org.pitest.mutationtest.MutationStatusTestPair;
-import org.pitest.mutationtest.engine.*;
+import org.pitest.mutationtest.engine.Mutant;
+import org.pitest.mutationtest.engine.Mutater;
+import org.pitest.mutationtest.engine.MutationDetails;
+import org.pitest.mutationtest.engine.MutationIdentifier;
+import org.pitest.mutationtest.engine.SimplifiedMutationDetails;
 import org.pitest.mutationtest.mocksupport.JavassistInterceptor;
 import org.pitest.testapi.TestResult;
 import org.pitest.testapi.TestUnit;
@@ -52,7 +56,7 @@ public class MutationTestWorker {
   private static final boolean                              DEBUG = LOG
       .isLoggable(Level.FINE);
 
-  private final Mutater                                     mutater;
+  private final Mutater mutater;
   private final ClassLoader                                 loader;
   private final F3<ClassName, ClassLoader, byte[], Boolean> hotswap;
   private final boolean                                     fullMutationMatrix;
@@ -67,7 +71,7 @@ public class MutationTestWorker {
   }
 
   protected void run(final Collection<MutationDetails> range, final Reporter r,
-      final TimeOutDecoratedTestSource testSource) throws IOException {
+                     final TimeOutDecoratedTestSource testSource) throws IOException {
 
     for (final MutationDetails mutation : range) {
       if (DEBUG) {
@@ -87,8 +91,7 @@ public class MutationTestWorker {
   {
     try {
       List<SimplifiedMutationDetails> simplifiedMutationDetailsList = new ArrayList<>();
-      for (MutationDetails md : range)
-      {
+      for (MutationDetails md : range) {
         simplifiedMutationDetailsList.add(new SimplifiedMutationDetails(md));
       }
       FileOutputStream fileOut = new FileOutputStream(filePath);

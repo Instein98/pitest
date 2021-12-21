@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.pitest.mutationtest.report.xml.Tag.*;
 
 enum Tag {
   mutation, sourceFile, mutatedClass, mutatedMethod, methodDescription, lineNumber, mutator, index, killingTest, killingTests, succeedingTests, description, block, timeoutTests, runErrorTests, memoryErrorTests,
@@ -62,7 +61,7 @@ public class XMLReportListener implements MutationResultListener {
 
   private void writeMutationResultXML(final MutationResult result) {
     write(makeNode(makeMutationNode(result), makeMutationAttributes(result),
-        mutation) + "\n");
+        Tag.mutation) + "\n");
   }
 
   private String makeMutationAttributes(final MutationResult result) {
@@ -74,29 +73,29 @@ public class XMLReportListener implements MutationResultListener {
   private String makeMutationNode(final MutationResult mutation) {
     final MutationDetails details = mutation.getDetails();
     MutationStatusTestPair mstp = mutation.getStatusTestPair();
-    return makeNode(clean(details.getFilename()), sourceFile)
-            + makeNode(clean(details.getClassName().asJavaName()), mutatedClass)
-            + makeNode(clean(details.getMethod().name()), mutatedMethod)
+    return makeNode(clean(details.getFilename()), Tag.sourceFile)
+            + makeNode(clean(details.getClassName().asJavaName()), Tag.mutatedClass)
+            + makeNode(clean(details.getMethod().name()), Tag.mutatedMethod)
             + makeNode(clean(details.getId().getLocation().getMethodDesc()),
-            methodDescription)
-            + makeNode("" + details.getLineNumber(), lineNumber)
-            + makeNode(clean(details.getMutator()), mutator)
-            + makeNode("" + details.getFirstIndex(), index)
-            + makeNode("" + details.getBlock(), block)
+            Tag.methodDescription)
+            + makeNode("" + details.getLineNumber(), Tag.lineNumber)
+            + makeNode(clean(details.getMutator()), Tag.mutator)
+            + makeNode("" + details.getFirstIndex(), Tag.index)
+            + makeNode("" + details.getBlock(), Tag.block)
             + makeNodeWhenConditionSatisfied(!fullMutationMatrix,
-            createKillingTestDesc(mutation.getKillingTest()), killingTest)
+            createKillingTestDesc(mutation.getKillingTest()), Tag.killingTest)
             + makeNodeWhenConditionSatisfied(fullMutationMatrix,
-            createTestDesc(mutation.getKillingTests()), killingTests)
+            createTestDesc(mutation.getKillingTests()), Tag.killingTests)
             + makeNodeWhenConditionSatisfied(fullMutationMatrix,
-            createTestDesc(mutation.getSucceedingTests()), succeedingTests)
+            createTestDesc(mutation.getSucceedingTests()), Tag.succeedingTests)
             + makeNodeWhenConditionSatisfied(fullMutationMatrix,
-            createTestDesc(mutation.getTimeoutTests()), timeoutTests)
+            createTestDesc(mutation.getTimeoutTests()), Tag.timeoutTests)
             + makeNodeWhenConditionSatisfied(fullMutationMatrix,
-            createTestDesc(mutation.getRunErrorTests()), runErrorTests)
+            createTestDesc(mutation.getRunErrorTests()), Tag.runErrorTests)
             + makeNodeWhenConditionSatisfied(fullMutationMatrix,
-            createTestDesc(mutation.getMemoryErrorTests()), memoryErrorTests)
-            + makeNode(clean(details.getDescription()), description)
-            + makeNode(makeTestExecutionNodes(mutation, mstp), testsExecution);
+            createTestDesc(mutation.getMemoryErrorTests()), Tag.memoryErrorTests)
+            + makeNode(clean(details.getDescription()), Tag.description)
+            + makeNode(makeTestExecutionNodes(mutation, mstp), Tag.testsExecution);
 //            + makeNode(String.valueOf(mstp.getMutationExecutionTime()) + "ms", patchExecutionTime);
   }
 
@@ -145,7 +144,7 @@ public class XMLReportListener implements MutationResultListener {
     StringBuilder builder = new StringBuilder();
 
     for (String test : tests) {
-      String nameNode = makeNode(test, name);
+      String nameNode = makeNode(test, Tag.name);
       String testNode = makeNode(nameNode, Tag.test);
       builder.append(testNode);
 //      builder.append(test);
@@ -167,32 +166,32 @@ public class XMLReportListener implements MutationResultListener {
     }
   }
 
-  private String makeTestExecutionNodes(MutationResult mutation, MutationStatusTestPair mstp){
+  private String makeTestExecutionNodes(MutationResult mutation, MutationStatusTestPair mstp) {
     List<String> killed = mutation.getKillingTests();
     List<String> succeed = mutation.getSucceedingTests();
     List<String> timeout = mutation.getTimeoutTests();
     List<String> runErr = mutation.getRunErrorTests();
     List<String> memErr = mutation.getMemoryErrorTests();
     StringBuilder sb = new StringBuilder();
-    for (Map.Entry<Description, Long>entry : mstp.getTestsExecutionTime().entrySet()){
+    for (Map.Entry<Description, Long>entry : mstp.getTestsExecutionTime().entrySet()) {
       String testName = entry.getKey().getQualifiedName();
-      String nameNode = makeNode(testName, name);
+      String nameNode = makeNode(testName, Tag.name);
       String statusNode;
-      if (killed.contains(testName)){
-        statusNode = makeNode("FAIL", testStatus);
-      } else if (succeed.contains(testName)){
-        statusNode = makeNode("PASS", testStatus);
-      } else if (timeout.contains(testName)){
-        statusNode = makeNode("TIMEOUT", testStatus);
-      } else if (runErr.contains(testName)){
-        statusNode = makeNode("RUNTIME_ERROR", testStatus);
-      } else if (memErr.contains(testName)){
-        statusNode = makeNode("MEMORY_ERROR", testStatus);
+      if (killed.contains(testName)) {
+        statusNode = makeNode("FAIL", Tag.testStatus);
+      } else if (succeed.contains(testName)) {
+        statusNode = makeNode("PASS", Tag.testStatus);
+      } else if (timeout.contains(testName)) {
+        statusNode = makeNode("TIMEOUT", Tag.testStatus);
+      } else if (runErr.contains(testName)) {
+        statusNode = makeNode("RUNTIME_ERROR", Tag.testStatus);
+      } else if (memErr.contains(testName)) {
+        statusNode = makeNode("MEMORY_ERROR", Tag.testStatus);
       } else {
-        statusNode = makeNode("UNKNOWN", testStatus);
+        statusNode = makeNode("UNKNOWN", Tag.testStatus);
       }
-      String timeNode = makeNode(entry.getValue().toString() + "ms", time);
-      String testNode = makeNode(nameNode + statusNode + timeNode, test);
+      String timeNode = makeNode(entry.getValue().toString() + "ms", Tag.time);
+      String testNode = makeNode(nameNode + statusNode + timeNode, Tag.test);
       sb.append(testNode);
     }
     return sb.toString();
@@ -202,16 +201,14 @@ public class XMLReportListener implements MutationResultListener {
    * Prepare to make test time nodes
    * @author: Jun Yang
    */
-  private String getRunTestNodes(Map<Description, Long> testTimeMap)
-  {
+  private String getRunTestNodes(Map<Description, Long> testTimeMap) {
     String testNodes = "";
     long t0 = System.currentTimeMillis();
 
-    for (Map.Entry<Description, Long>entry : testTimeMap.entrySet())
-    {
-      String nameNode = makeNode(entry.getKey().getQualifiedName(), name);
-      String timeNode = makeNode(entry.getValue().toString() + "ms", time);
-      String testNode = makeNode(nameNode + timeNode, test);
+    for (Map.Entry<Description, Long>entry : testTimeMap.entrySet()) {
+      String nameNode = makeNode(entry.getKey().getQualifiedName(), Tag.name);
+      String timeNode = makeNode(entry.getValue().toString() + "ms", Tag.time);
+      String testNode = makeNode(nameNode + timeNode, Tag.test);
       testNodes += testNode;
     }
     return testNodes;

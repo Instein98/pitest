@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Optional;
 
-import org.pitest.functional.Option;
 import org.pitest.mutationtest.ClassMutationResults;
 import org.pitest.mutationtest.MutationResult;
 import org.pitest.mutationtest.MutationResultListener;

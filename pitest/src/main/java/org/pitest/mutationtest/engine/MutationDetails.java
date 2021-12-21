@@ -14,9 +14,6 @@
  */
 package org.pitest.mutationtest.engine;
 
-import java.io.Serializable;
-import java.util.*;
-
 import org.pitest.classinfo.ClassName;
 import org.pitest.coverage.ClassLine;
 import org.pitest.coverage.TestInfo;
@@ -24,6 +21,13 @@ import org.pitest.testapi.Description;
 import org.pitest.util.Commons;
 import org.pitest.util.Preconditions;
 import org.pitest.util.StringUtil;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Captures all data relating to a mutant.
@@ -268,8 +272,7 @@ public final class MutationDetails implements Serializable {
    * Record time of executing a patch
    * @author: Jun Yang
    */
-  public void setPatchExecutionTime(long time)
-  {
+  public void setPatchExecutionTime(long time) {
     this.patchExecutionTime = time;
   }
 
@@ -277,8 +280,7 @@ public final class MutationDetails implements Serializable {
    * Add time of running a test on the patch
    * @author: Jun Yang
    */
-  public void addTestTime(Description ds, long time)
-  {
+  public void addTestTime(Description ds, long time) {
     this.mutationDescTestsTime.put(ds, time);
   }
 
@@ -286,8 +288,7 @@ public final class MutationDetails implements Serializable {
    * Get time of executing the patch
    * @author: Jun Yang
    */
-  public long getPatchExecutionTime()
-  {
+  public long getPatchExecutionTime() {
     return this.patchExecutionTime;
   }
 
@@ -295,13 +296,11 @@ public final class MutationDetails implements Serializable {
    * Get time of tests of the patch
    * @author: Jun Yang
    */
-  public Map<String, Long> getTestsTimeMap()
-  {
+  public Map<String, Long> getTestsTimeMap() {
     return Commons.getStringMapFromDescMap(this.mutationDescTestsTime);
   }
 
-  public Map<Description, Long> getDescTestsTimeMap()
-  {
+  public Map<Description, Long> getDescTestsTimeMap() {
     return this.mutationDescTestsTime;
   }
 
@@ -309,13 +308,11 @@ public final class MutationDetails implements Serializable {
    * Set time of tests of the patch
    * @author: Jun Yang
    */
-  public void setTestsTimeMap(Map<String, Long> mutationTestsTime)
-  {
+  public void setTestsTimeMap(Map<String, Long> mutationTestsTime) {
     this.mutationTestsTime = mutationTestsTime;
   }
 
-  public void setDescTestTimeMap(Map<Description, Long> mutationDescTestsTime)
-  {
+  public void setDescTestTimeMap(Map<Description, Long> mutationDescTestsTime) {
     this.mutationDescTestsTime = mutationDescTestsTime;
   }
 

@@ -14,13 +14,6 @@
  */
 package org.pitest.mutationtest.execute;
 
-import java.util.Collection;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Logger;
-
 import org.pitest.extension.common.TestUnitDecorator;
 import org.pitest.functional.SideEffect;
 import org.pitest.mutationtest.TimeoutLengthStrategy;
@@ -32,6 +25,13 @@ import org.pitest.testapi.execute.ExitingResultCollector;
 import org.pitest.testapi.execute.containers.ConcreteResultCollector;
 import org.pitest.util.Log;
 import org.pitest.util.Unchecked;
+
+import java.util.Collection;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Logger;
 
 public final class MutationTimeoutDecorator extends TestUnitDecorator {
 
@@ -60,17 +60,15 @@ public final class MutationTimeoutDecorator extends TestUnitDecorator {
     executeFutureWithTimeOut(maxTime, future, rc);
     long testExecutionTime = System.currentTimeMillis() - t0;
     // LOG.info("I can execute and print");
-    if (rc instanceof ExitingResultCollector)
-    {
+    if (rc instanceof ExitingResultCollector) {
       // LOG.info("This is a ExitingResultCollector");
       ExitingResultCollector erc = (ExitingResultCollector) rc;
       ResultCollector childCollector = erc.getChild();
-      if (childCollector instanceof ConcreteResultCollector)
-      {
+      if (childCollector instanceof ConcreteResultCollector) {
         // LOG.info("This is a ConcreteResultCollector");
         ConcreteResultCollector crc = (ConcreteResultCollector) childCollector;
         Collection<TestResult> feedback = crc.getFeedback();
-        if (!future.isDone()){
+        if (!future.isDone()) {
 //          LOG.info("********************** Accurate TIME_OUT cost:" + testExecutionTime + " **********************");
         }
         feedback.add(new TestResult(new Description("testExecutionTime:" + this.child().getDescription().getFirstTestClass() + "#" + this.child().getDescription().getName()

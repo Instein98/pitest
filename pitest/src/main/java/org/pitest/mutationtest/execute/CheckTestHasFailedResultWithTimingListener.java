@@ -1,6 +1,5 @@
 package org.pitest.mutationtest.execute;
 
-import org.pitest.functional.Option;
 import org.pitest.mutationtest.DetectionStatus;
 import org.pitest.testapi.Description;
 import org.pitest.testapi.TestResult;
@@ -10,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CheckTestHasFailedResultWithTimingListener extends CheckTestHasFailedResultListener{
+public class CheckTestHasFailedResultWithTimingListener extends CheckTestHasFailedResultListener {
 
     private final List<Description> succeedingTests = new ArrayList<>();
     private final List<Description>   failingTests = new ArrayList<>();
@@ -76,13 +75,11 @@ public class CheckTestHasFailedResultWithTimingListener extends CheckTestHasFail
 
     }
 
-    public void setDescTestsExecutionTime(Map<Description, Long> testsDescExecutionTimeMap)
-    {
+    public void setDescTestsExecutionTime(Map<Description, Long> testsDescExecutionTimeMap) {
         this.testsDescExecutionTimeMap = testsDescExecutionTimeMap;
     }
 
-    public Map<Description, Long> getDescTestsExecutionTime()
-    {
+    public Map<Description, Long> getDescTestsExecutionTime() {
         return this.testsDescExecutionTimeMap;
     }
 

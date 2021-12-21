@@ -14,15 +14,19 @@
  */
 package org.pitest.functional.prelude;
 
+import org.pitest.functional.F;
+import org.pitest.functional.SideEffect1;
+import org.pitest.functional.predicate.And;
+import org.pitest.functional.predicate.Not;
+import org.pitest.functional.predicate.Or;
+import org.pitest.functional.predicate.Or2;
+import org.pitest.functional.predicate.Predicate;
+
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-
-import org.pitest.functional.F;
-import org.pitest.functional.SideEffect1;
-import org.pitest.functional.predicate.*;
 
 /**
  * @author henry

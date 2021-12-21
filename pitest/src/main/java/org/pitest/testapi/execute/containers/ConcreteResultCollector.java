@@ -14,12 +14,12 @@
  */
 package org.pitest.testapi.execute.containers;
 
-import java.util.Collection;
-
 import org.pitest.testapi.Description;
 import org.pitest.testapi.ResultCollector;
 import org.pitest.testapi.TestResult;
 import org.pitest.testapi.TestUnitState;
+
+import java.util.Collection;
 
 public final class ConcreteResultCollector implements ResultCollector {
 
@@ -58,8 +58,7 @@ public final class ConcreteResultCollector implements ResultCollector {
     return false;
   }
 
-  public Collection<TestResult> getFeedback()
-  {
+  public Collection<TestResult> getFeedback() {
     return this.feedback;
   }
 }

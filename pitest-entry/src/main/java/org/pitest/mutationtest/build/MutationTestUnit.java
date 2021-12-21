@@ -14,16 +14,6 @@
  */
 package org.pitest.mutationtest.build;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.logging.Logger;
-
 import org.pitest.classinfo.ClassName;
 import org.pitest.coverage.TestInfo;
 import org.pitest.mutationtest.DetectionStatus;
@@ -35,6 +25,11 @@ import org.pitest.mutationtest.engine.MutationIdentifier;
 import org.pitest.mutationtest.execute.MutationTestProcess;
 import org.pitest.util.ExitCode;
 import org.pitest.util.Log;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.logging.Logger;
 
 public class MutationTestUnit implements MutationAnalysisUnit {
 
@@ -122,7 +117,7 @@ public class MutationTestUnit implements MutationAnalysisUnit {
 
           if (exitCode != ExitCode.OK) {
             // Todo: why r is null in chart-3 for full-matrix?
-            if (r == null){
+            if (r == null) {
               LOG.severe("Worker thread get null MutationStatusTestPair. ExitCode: " + exitCode);
               continue;
             } else {

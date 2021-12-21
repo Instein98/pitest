@@ -14,6 +14,9 @@
  */
 package org.pitest.mutationtest;
 
+import org.pitest.functional.FCollection;
+import org.pitest.mutationtest.engine.MutationDetails;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,10 +28,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.pitest.functional.FCollection;
-import org.pitest.mutationtest.engine.MutationDetails;
+import static org.pitest.functional.prelude.Prelude.or2;
+import static org.pitest.functional.prelude.Prelude.putToMap;
 
-import static org.pitest.functional.prelude.Prelude.*;
 
 public class MutationStatusMap {
 

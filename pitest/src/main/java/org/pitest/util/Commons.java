@@ -2,7 +2,14 @@ package org.pitest.util;
 
 import org.pitest.testapi.Description;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +23,7 @@ public class Commons {
     public static void addContentToPool(String poolPath, String content) {
         FileWriter fw = null;
         try {
-            File f=new File(poolPath);
+            File f = new File(poolPath);
             fw = new FileWriter(f, true);
         } catch (IOException e) {
             e.printStackTrace();
@@ -88,8 +95,7 @@ public class Commons {
     public static <V> Map<String, V> getStringMapFromDescMap(Map<Description, V> descMap)
     {
         Map<String, V> stringMap = new HashMap<>();
-        for (Map.Entry<Description, V>entry : descMap.entrySet())
-        {
+        for (Map.Entry<Description, V>entry : descMap.entrySet()) {
             stringMap.put(entry.getKey().getFirstTestClass() + "." + entry.getKey().getName(), entry.getValue());
         }
 

@@ -14,15 +14,11 @@
  */
 package org.pitest.mutationtest.engine;
 
-import org.pitest.classinfo.ClassName;
-import org.pitest.coverage.ClassLine;
-import org.pitest.coverage.TestInfo;
 import org.pitest.testapi.Description;
-import org.pitest.util.Preconditions;
-import org.pitest.util.StringUtil;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Captures all data relating to a mutant.
@@ -35,31 +31,26 @@ public final class SimplifiedMutationDetails implements Serializable {
   private Map<String, Long> testExecutionTimeMap = new HashMap<>();
   private Map<Description, Long> testExecutionDescTimeMap = new HashMap<>();
 
-  public SimplifiedMutationDetails(MutationDetails md)
-  {
+  public SimplifiedMutationDetails(MutationDetails md) {
     this.id = md.getId();
     this.patchExecutionTime = md.getPatchExecutionTime();
     this.testExecutionTimeMap = md.getTestsTimeMap();
     this.testExecutionDescTimeMap = md.getDescTestsTimeMap();
   }
 
-  public MutationIdentifier getId()
-  {
+  public MutationIdentifier getId() {
     return this.id;
   }
 
-  public long getPatchExecutionTime()
-  {
+  public long getPatchExecutionTime() {
     return this.patchExecutionTime;
   }
 
-  public Map<String, Long> getTestsTimeMap()
-  {
+  public Map<String, Long> getTestsTimeMap() {
     return this.testExecutionTimeMap;
   }
 
-  public Map<Description, Long> getTestsDescTimeMap()
-  {
+  public Map<Description, Long> getTestsDescTimeMap() {
     return this.testExecutionDescTimeMap;
   }
 }

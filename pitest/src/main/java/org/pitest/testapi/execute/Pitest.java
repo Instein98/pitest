@@ -15,15 +15,19 @@
 
 package org.pitest.testapi.execute;
 
+import org.pitest.mutationtest.engine.Mutant;
+import org.pitest.testapi.Configuration;
+import org.pitest.testapi.Description;
+import org.pitest.testapi.TestListener;
+import org.pitest.testapi.TestResult;
+import org.pitest.testapi.TestUnit;
+import org.pitest.util.Log;
+import org.pitest.util.PitError;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
-
-import org.pitest.mutationtest.engine.Mutant;
-import org.pitest.testapi.*;
-import org.pitest.util.Log;
-import org.pitest.util.PitError;
 
 public class Pitest {
 
@@ -77,10 +81,8 @@ public class Pitest {
                             final List<? extends TestUnit> testUnits, Mutant mutedClass) {
     for (final TestUnit unit : testUnits) {
       final List<TestResult> results = container.execute(unit);
-      for (TestResult tr : results)
-      {
-        if (tr.getDescription().getName().startsWith("testExecutionTime:"))
-        {
+      for (TestResult tr : results) {
+        if (tr.getDescription().getName().startsWith("testExecutionTime:")) {
           String descName = tr.getDescription().getName();
           String test = descName.substring(descName.lastIndexOf(":") + 1);
           String testFullName = test.split("-")[0];
@@ -110,7 +112,9 @@ public class Pitest {
 
   private void processResults(final List<TestResult> results) {
     for (final TestResult result : results) {
-      if (result.getDescription().getName().startsWith("testExecutionTime-")) continue;
+      if (result.getDescription().getName().startsWith("testExecutionTime-")) {
+        continue;
+      }
       final ResultType classifiedResult = classify(result);
       classifiedResult.getListenerFunction(result).apply(listener);
     }
