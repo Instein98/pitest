@@ -75,6 +75,7 @@ public class MutationStatusMap {
   }
 
   public Collection<MutationDetails> getCrashed() {
+    // Todo: remove stream style
     return (Collection<MutationDetails>) this.mutationMap.entrySet().stream()
             .filter(or2(hasStatus(DetectionStatus.RUN_ERROR),
                     or2(hasStatus(DetectionStatus.MEMORY_ERROR),

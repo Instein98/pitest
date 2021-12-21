@@ -108,20 +108,26 @@ public class MutationTestUnit implements MutationAnalysisUnit {
       for (MutationDetails d : crashedRuns) {
         MutationStatusTestPair result = null;
         for (TestInfo t : d.getTestsInOrder()) {
-          MutationDetails singleTest = new MutationDetails(new MutationIdentifier(d.getId().getLocation(),
+          MutationDetails mutationWithSingleTest = new MutationDetails(new MutationIdentifier(d.getId().getLocation(),
                   d.getId().getIndexes(),d.getMutator()), d.getFilename(), d.getDescription(),
                   d.getLineNumber(), d.getBlock());
-          singleTest.addTestsInOrder(Collections.singleton(t));
-          worker = this.workerFactory.createWorker(Collections.singleton(singleTest), this.testClasses);
+          mutationWithSingleTest.addTestsInOrder(Collections.singleton(t));
+          worker = this.workerFactory.createWorker(Collections.singleton(mutationWithSingleTest), this.testClasses);
           worker.start();
           Long t0 = System.currentTimeMillis();
           exitCode = waitForMinionToDie(worker);
           // Todo: use socket to record and pass timeout cost
           Long cost = System.currentTimeMillis() - t0;
-          MutationStatusTestPair r = worker.results(singleTest);
+          MutationStatusTestPair r = worker.results(mutationWithSingleTest);
 
           if (exitCode != ExitCode.OK) {
-            r.setErrorStatusAndName(DetectionStatus.getForErrorExitCode(exitCode), t.getName());
+            // Todo: why r is null in chart-3 for full-matrix?
+            if (r == null){
+              LOG.severe("Worker thread get null MutationStatusTestPair. ExitCode: " + exitCode);
+              continue;
+            } else {
+              r.setErrorStatusAndName(DetectionStatus.getForErrorExitCode(exitCode), t.getName());
+            }
           }
 
           if (result == null) {
