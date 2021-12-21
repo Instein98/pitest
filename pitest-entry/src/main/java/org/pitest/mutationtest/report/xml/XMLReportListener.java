@@ -35,7 +35,7 @@ import static org.pitest.mutationtest.report.xml.Tag.*;
 
 enum Tag {
   mutation, sourceFile, mutatedClass, mutatedMethod, methodDescription, lineNumber, mutator, index, killingTest, killingTests, succeedingTests, description, block, timeoutTests, runErrorTests, memoryErrorTests,
-  patchExecutionTime, test, time, name, testsExecutionTime
+  patchExecutionTime, test, time, name, testsExecution, testStatus
 }
 
 public class XMLReportListener implements MutationResultListener {
@@ -96,7 +96,7 @@ public class XMLReportListener implements MutationResultListener {
             + makeNodeWhenConditionSatisfied(fullMutationMatrix,
             createTestDesc(mutation.getMemoryErrorTests()), memoryErrorTests)
             + makeNode(clean(details.getDescription()), description)
-            + makeNode(getRunTestNodes(mstp.getTestsExecutionTime()), testsExecutionTime);
+            + makeNode(makeTestExecutionNodes(mutation, mstp), testsExecution);
 //            + makeNode(String.valueOf(mstp.getMutationExecutionTime()) + "ms", patchExecutionTime);
   }
 
@@ -145,14 +145,18 @@ public class XMLReportListener implements MutationResultListener {
     StringBuilder builder = new StringBuilder();
 
     for (String test : tests) {
-      builder.append(test);
-      builder.append(MUTATION_MATRIX_TEST_SEPARATOR);
+      String nameNode = makeNode(test, name);
+      String testNode = makeNode(nameNode, Tag.test);
+      builder.append(testNode);
+//      builder.append(test);
+//      builder.append(MUTATION_MATRIX_TEST_SEPARATOR);
     }
 
     // remove last separator
-    builder.setLength(builder.length() - 1);
+//    builder.setLength(builder.length() - 1);
 
-    return clean(builder.toString());
+//    return clean(builder.toString());
+    return builder.toString();
   }
 
   private void write(final String value) {
@@ -161,6 +165,37 @@ public class XMLReportListener implements MutationResultListener {
     } catch (final IOException e) {
       throw Unchecked.translateCheckedException(e);
     }
+  }
+
+  private String makeTestExecutionNodes(MutationResult mutation, MutationStatusTestPair mstp){
+    List<String> killed = mutation.getKillingTests();
+    List<String> succeed = mutation.getSucceedingTests();
+    List<String> timeout = mutation.getTimeoutTests();
+    List<String> runErr = mutation.getRunErrorTests();
+    List<String> memErr = mutation.getMemoryErrorTests();
+    StringBuilder sb = new StringBuilder();
+    for (Map.Entry<Description, Long>entry : mstp.getTestsExecutionTime().entrySet()){
+      String testName = entry.getKey().getQualifiedName();
+      String nameNode = makeNode(testName, name);
+      String statusNode;
+      if (killed.contains(testName)){
+        statusNode = makeNode("FAIL", testStatus);
+      } else if (succeed.contains(testName)){
+        statusNode = makeNode("PASS", testStatus);
+      } else if (timeout.contains(testName)){
+        statusNode = makeNode("TIMEOUT", testStatus);
+      } else if (runErr.contains(testName)){
+        statusNode = makeNode("RUNTIME_ERROR", testStatus);
+      } else if (memErr.contains(testName)){
+        statusNode = makeNode("MEMORY_ERROR", testStatus);
+      } else {
+        statusNode = makeNode("UNKNOWN", testStatus);
+      }
+      String timeNode = makeNode(entry.getValue().toString() + "ms", time);
+      String testNode = makeNode(nameNode + statusNode + timeNode, test);
+      sb.append(testNode);
+    }
+    return sb.toString();
   }
 
   /**
